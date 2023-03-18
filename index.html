@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>GAME</title>
+</head>
+<style>
+    div {
+        display: flex;
+        justify-content: center;
+    }
+    canvas {
+        background-color: antiquewhite;
+    }
+</style>
+<body>
+    <div id="canv">
+        <canvas id="myCanvas" width="500" height="800"></canvas>
+    </div>
+    <script type="module" src="./controller/gameloop.js"></script>
+    <script type="module" src="/view/Renderer.js"></script>
+    <script type="module" src="/model/paddle.js"></script>
+    <script type="module" src="/model/ball.js"></script>
+    <script type="module" src="/model/vector.js"></script>
+    
+</body>
+</html>
