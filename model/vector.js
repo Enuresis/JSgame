@@ -12,12 +12,12 @@ export class Vector {
       return new Vector(this.x - other.x, this.y - other.y);
     }
   
-    multiply(scalar) {
-      return new Vector(this.x * scalar, this.y * scalar);
+    multiply(other) {
+      return new Vector(this.x * other, this.y * other);
     }
   
-    divide(scalar) {
-      return new Vector(this.x / scalar, this.y / scalar);
+    divide(other) {
+      return new Vector(this.x / other, this.y / other);
     }
   
     dot(other) {
@@ -35,5 +35,11 @@ export class Vector {
   
     reflect(normal) {
       return this.subtract(normal.multiply(2 * this.dot(normal)));
+    }
+    length() {
+      return Math.sqrt(this.x * this.x + this.y * this.y);
+    }
+    scale(other) {
+      return new Vector(this.x * other,this.y * other)
     }
   }

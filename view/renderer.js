@@ -1,5 +1,6 @@
 import { paddle } from "../controller/gameloop.js";
 import { ball } from "../controller/gameloop.js";
+import { paused } from "../controller/gameloop.js";
 
 export let canvas = document.querySelector('canvas')
 export let ctx = canvas.getContext("2d")
@@ -24,8 +25,17 @@ function renderBall(ball) {
         ctx.closePath()
 }
 
+function updateOverlay() {
+    if (paused) {
+      document.getElementById("overlay").style.display = "block";
+    } else {
+      document.getElementById("overlay").style.display = "none";
+    }
+}
+
 // render on screen
 export function renderGame() {
+    updateOverlay();
     clearCanvas();
     renderPaddle(paddle);
     renderBall(ball);

@@ -4,6 +4,29 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <title>GAME</title>
+    <style>
+    #overlay {
+        position: fixed;
+        display: none;
+        width: 100%;
+        height: 100%;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: rgba(0,0,0,0.5);
+        z-index: 2;
+    }
+    #text{
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        font-size: 50px;
+        color: white;
+        transform: translate(-50%,-50%);
+        -ms-transform: translate(-50%,-50%);
+    }   
+    </style>
 </head>
 <style>
     div {
@@ -11,10 +34,13 @@
         justify-content: center;
     }
     canvas {
-        background-color: antiquewhite;
+        background-color: black;
     }
 </style>
 <body>
+    <div id="overlay">
+        <div id="text">PAUSED!!</div>
+      </div>
     <div id="canv">
         <canvas id="myCanvas" width="500" height="800"></canvas>
     </div>
