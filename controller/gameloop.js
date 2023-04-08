@@ -1,23 +1,24 @@
-import {renderGame} from "../view/renderer.js";
+import {renderGame,canvas,updateOverlay,renderMainMenu,renderOptions} from "../view/renderer.js";
 import {Paddle} from "../model/paddle.js";
-import {canvas} from "../view/renderer.js";
 import {Ball} from "../model/ball.js";
 import {Vector} from "../model/vector.js";
 import {Enemy} from "../model/enemy.js";
-import {updateOverlay} from "../view/renderer.js";
-import {renderMainMenu} from "../view/renderer.js";
 import {Button} from "../model/button.js";
 import {Sound} from "../model/sound.js";
-import {renderOptions} from "../view/renderer.js";
+import { Particle } from "../model/particle.js";
+
 
 let rightPressed = false;
 let leftPressed = false;
+let twinke = false;
 let frames = 0;
 let mousePos;
 let cookieM;
+let rate;
 export let musik = cookieM || true;
 let pauseGameLoop;
 let optionBtn = document.getElementById('options');
+export let stars = [];
 export let buffer = [];
 export let optionBuffer = [];
 export let mainBuffer = [];
@@ -57,6 +58,17 @@ optionBtn.addEventListener('click', () => {
         startGame();
     }
 });
+
+function spawnStars() {
+    for (let i = 0;i < 1000;i++) {
+        if (Math.round(Math.random())== 1) {
+            twinke = true;
+        } else {
+            twinke = false
+        }
+        stars.push(new Particle({position: {x:Math.random()* canvas.width,y:Math.random() * canvas.height},velocity:{x:0,y:0}},Math.random()*1,'white',twinke))
+    }
+}
 
 // spawner enemy
 function spawner() {
@@ -128,7 +140,7 @@ function optionsMenu() {
         btn.index = i;
         optionBuffer.push(btn);
     }
-    let s = new Button({position:{x:canvas.width/2-75,y:canvas.height/3},dimentions:{width:150,height:75}},'SOUND', 'sound');
+    let s = new Button({position:{x:canvas.width/2-75,y:canvas.height/3},dimentions:{width:62,height:52}},'SOUND', 'sound');
     s.index = numB;
     optionBuffer.push(s);
 }
@@ -260,10 +272,25 @@ function movement() {
             }
         })
     }
+    function moveStars() {
+        stars.forEach(paricle=> {
+            rate = Math.round(randN(2,8))
+            paricle.position.x += paricle.velocity.x;
+            paricle.position.y += paricle.velocity.y;
+            //console.log(rate)
+            if (paricle.sparkle && rate % 8 === 0) {
+                paricle.radius = randN(paricle.radius-paricle.radius/5,paricle.radius+0.2)
+            }
+            else if (rate % 16 == 0) {
+                paricle.radius = randN(paricle.radius-paricle.radius/5,paricle.radius+0.2)
+            } 
+        })
+    }
     // call individual moves
     moveEnemy();
     movePaddle();
     moveBall();
+    moveStars();
 }
 
 // update state based on statemachine mozno som kokot ale takto to ide
@@ -277,6 +304,7 @@ if (states.run == true && states.running == false) {
 
     // start the game
     physicsGameLoop();
+    spawnStars();
 }
     function GameLoop() {
         renderGame();
@@ -285,7 +313,6 @@ if (states.run == true && states.running == false) {
             spawner();
             frames++;
         }
-        console.log(cookieM)
     }
 
     function physicsGameLoop() {

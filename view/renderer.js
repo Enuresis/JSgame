@@ -1,9 +1,5 @@
-import { musik, paddle } from "../controller/gameloop.js";
-import { ball } from "../controller/gameloop.js";
-import { states } from "../controller/gameloop.js";
-import { buffer } from "../controller/gameloop.js";
-import { mainBuffer } from "../controller/gameloop.js";
-import { optionBuffer } from "../controller/gameloop.js";
+import { musik, paddle,stars,ball,states,buffer,mainBuffer,optionBuffer} from "../controller/gameloop.js";
+
 
 export let canvas = document.querySelector('canvas')
 export let ctx = canvas.getContext("2d")
@@ -58,7 +54,7 @@ function renderButton(buffer) {
             } else {
                 image.src = './assets/icons/34.png'
             }
-            ctx.drawImage(image,Button.position.x,Button.position.y)
+            ctx.drawImage(image,Button.position.x,Button.position.y,Button.dimentions.width,Button.dimentions.height)
         }
         else if (Button.type == 'button') {
             const image = new Image()
@@ -80,9 +76,23 @@ function renderButton(buffer) {
     //console.log(mainBuffer);
 }
 
+function renderParticles() {
+    stars.forEach(particle => {
+        ctx.save()
+        ctx.globalAlpha = particle.opacity;
+        ctx.beginPath()
+        ctx.arc(particle.position.x,particle.position.y,particle.radius,0,Math.PI*2)
+        ctx.fillStyle = particle.color
+        ctx.fill()
+        ctx.closePath()
+        ctx.restore()
+    });
+}
+
 // render on screen
 export function renderGame() {
     clearCanvas();
+    renderParticles();
     renderPaddle(paddle);
     renderBall(ball);
     renderEnemy();
