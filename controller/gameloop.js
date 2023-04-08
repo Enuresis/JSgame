@@ -8,20 +8,22 @@ import { updateOverlay } from "../view/renderer.js";
 import { renderMainMenu } from "../view/renderer.js";
 import { Button } from "../model/button.js";
 import { Sound } from "../model/sound.js";
+import { renderOptions } from "../view/renderer.js";
 
 let rightPressed = false;
 let leftPressed = false;
 let frames = 0;
 let mousePos;
-let buttonPressed;
-let inter;
+let musik = true;
 export let buffer = [];
+export let optionBuffer = [];
 export let mainBuffer = [];
 export const states = {
     main: true,
     paused: false,
     run: false,
-    running: false
+    running: false,
+    options: false
 }
 
 // create paddle object and ball object
@@ -29,11 +31,11 @@ export const paddle = new Paddle(100,6);
 export const ball = new Ball(10,3);
 const soundTrack = new Sound("../assets/sounds/musik.mp3");
 
-function soundManager() {
-    if (states.paused == false) {
+function soundManager(option) {
+    if (states.paused == false && option == true) {
         soundTrack.play();
     }
-    if (states.paused == true) {
+    if (states.paused == true || option == false) {
         soundTrack.stop();
     }
 }
@@ -49,29 +51,61 @@ function spawner() {
 // get the index of a button and change state machine
 canvas.addEventListener("click", function (evt) {
     mousePos = getMousePos(evt);
-    mainBuffer.forEach((Button)=> {
-        if (Button.position.x < mousePos.x && Button.position.x + Button.dimentions.width > mousePos.x && Button.position.y < mousePos.y && Button.position.y+Button.dimentions.height > mousePos.y) {
-            if (Button.index == 0) {
-                states.run = true;
-                states.main = false;
-                statemachine();
-                startGame();
+    if (states.main == true) {
+        mainBuffer.forEach((Button)=> {
+            if (Button.position.x < mousePos.x && Button.position.x + Button.dimentions.width > mousePos.x && Button.position.y < mousePos.y && Button.position.y+Button.dimentions.height > mousePos.y) {
+                if (Button.index == 0) {
+                    states.run = true;
+                    states.main = false;
+                    startGame();
+                } else if (Button.index == 1) {
+                    states.options = true;
+                    states.run = false;
+                    states.main = false;
+                    optionsMenu();
+                    startGame();
+                }
             }
-        }
-    });
+        });
+    }
+    if (states.options == true) {
+        optionBuffer.forEach((Button)=> {
+            if (Button.position.x < mousePos.x && Button.position.x + Button.dimentions.width > mousePos.x && Button.position.y < mousePos.y && Button.position.y+Button.dimentions.height > mousePos.y) {
+                if (Button.index == 0) {
+                    states.main = true;
+                    states.options = false;
+                    optionBuffer.splice(0,2);
+                    startGame();
+                }
+                if(Button.index == 1) {
+                    musik = !musik
+                    console.log(musik)
+                }
+            }
+        });
+    }
 }, false);
+
+function optionsMenu() {
+    let numB = 1
+    for(let i = 0; i < numB; i++) {
+        let btn = (new Button({position:{x:20,y:canvas.height - 200},dimentions:{width:150,height:75}},'BACK'))
+        btn.index = i;
+        optionBuffer.push(btn);
+    }
+    let s = new Button({position:{x:canvas.width/2-75,y:canvas.height/3},dimentions:{width:150,height:75}},'SOUND');
+    s.index = numB;
+    optionBuffer.push(s);
+}
 
 // create main menu
 function mainMenu() {
-    function createMain() {
-        let numB = 3;
-        for(let i = 0;i< numB;i++) {
-            let btn = (new Button({position:{x:canvas.width/2-75,y:canvas.height/2 + 80*i-75},dimentions:{width:150,height:75}},'HEJ'))
-            btn.index = i;
-            mainBuffer.push(btn);
-        }
+    let numB = 3;
+    for(let i = 0;i< numB;i++) {
+        let btn = (new Button({position:{x:canvas.width/2-75,y:canvas.height/2 + 80*i-75},dimentions:{width:150,height:75}},'HEJ'))
+        btn.index = i;
+        mainBuffer.push(btn);
     }
-    createMain();
 }
 // get coords relative to canvas
 function getMousePos(evt) {
@@ -88,7 +122,7 @@ function randN(min, max) {
 // escape key
 document.addEventListener('keydown', (event) => {
     if (event.key === 'Escape') {
-      if(states.main == false) {
+      if(states.main == false && states.options == false) {
         states.paused = !states.paused;
       } 
         updateOverlay();
@@ -216,14 +250,14 @@ if (states.run == true && states.running == false) {
     function physicsGameLoop() {
         let lastTimestamp = 0;
         function loop(timestamp) {
-            const deltaTime = (timestamp - lastTimestamp) / 1000; // convert to seconds
+            const deltaTime = (timestamp - lastTimestamp) / 1000; 
             lastTimestamp = timestamp;
     
             if (!states.paused) {
                 movement(deltaTime);
-                soundManager(true);
+                soundManager(musik);
             } else {
-                soundManager(false);
+                soundManager(musik);
             }
 
             requestAnimationFrame(loop);
@@ -239,7 +273,14 @@ if (states.run == true && states.running == false) {
     physicsGameLoop();
 }
 
+if (states.options == true) {
+    function Options() {
+        requestAnimationFrame(Options);
+        renderOptions();
+    }
+    Options();
 }
+
 if (states.main == true) {
     function Menu() {
         requestAnimationFrame(Menu);
@@ -248,3 +289,5 @@ if (states.main == true) {
     Menu();
 }
 
+}
+startGame();

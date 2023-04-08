@@ -3,8 +3,7 @@ import { ball } from "../controller/gameloop.js";
 import { states } from "../controller/gameloop.js";
 import { buffer } from "../controller/gameloop.js";
 import { mainBuffer } from "../controller/gameloop.js";
-import { Button } from "../model/button.js";
-
+import { optionBuffer } from "../controller/gameloop.js";
 
 export let canvas = document.querySelector('canvas')
 export let ctx = canvas.getContext("2d")
@@ -50,8 +49,8 @@ export function updateOverlay() {
     }
 }
 
-function renderButton() {
-    mainBuffer.forEach((Button) => {
+function renderButton(buffer) {
+    buffer.forEach((Button) => {
         ctx.fillStyle = 'red';
         ctx.fillRect(Button.position.x, Button.position.y, Button.dimentions.width, Button.dimentions.height);
         //console.log(Button);
@@ -70,7 +69,12 @@ export function renderGame() {
     renderEnemy();
 }
 
+export function renderOptions() {
+    clearCanvas();
+    renderButton(optionBuffer);
+}
+
 export function renderMainMenu() {
     clearCanvas();
-    renderButton();
+    renderButton(mainBuffer);
 }
