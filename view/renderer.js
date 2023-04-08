@@ -1,4 +1,4 @@
-import { paddle } from "../controller/gameloop.js";
+import { musik, paddle } from "../controller/gameloop.js";
 import { ball } from "../controller/gameloop.js";
 import { states } from "../controller/gameloop.js";
 import { buffer } from "../controller/gameloop.js";
@@ -51,12 +51,31 @@ export function updateOverlay() {
 
 function renderButton(buffer) {
     buffer.forEach((Button) => {
-        ctx.fillStyle = 'red';
-        ctx.fillRect(Button.position.x, Button.position.y, Button.dimentions.width, Button.dimentions.height);
-        //console.log(Button);
-        ctx.fillStyle = 'white';
-        ctx.font = "48px serif";
-        ctx.fillText(Button.name, Button.position.x+Button.dimentions.width/2, Button.position.y+Button.dimentions.height/2);
+        if (Button.type == 'sound') {
+            const image = new Image()
+            if (musik) {
+                image.src = './assets/icons/35.png'
+            } else {
+                image.src = './assets/icons/34.png'
+            }
+            ctx.drawImage(image,Button.position.x,Button.position.y)
+        }
+        else if (Button.type == 'button') {
+            const image = new Image()
+            image.src = './assets/icons/ButtonNormal.png'
+            ctx.drawImage(image,Button.position.x,Button.position.y,Button.dimentions.width,Button.dimentions.height)
+            ctx.fillStyle = 'white';
+            ctx.font = "40px serif";
+            ctx.fillText(Button.name, Button.position.x, Button.position.y+Button.dimentions.height/2+15);
+        }
+        else {
+            ctx.fillStyle = 'red';
+            ctx.fillRect(Button.position.x, Button.position.y, Button.dimentions.width, Button.dimentions.height);
+            //console.log(Button);
+            ctx.fillStyle = 'white';
+            ctx.font = "48px serif";
+            ctx.fillText(Button.name, Button.position.x+Button.dimentions.width/2, Button.position.y+Button.dimentions.height/2);
+        }
     });
     //console.log(mainBuffer);
 }

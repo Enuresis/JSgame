@@ -3,18 +3,21 @@ import {Paddle} from "../model/paddle.js";
 import {canvas} from "../view/renderer.js";
 import {Ball} from "../model/ball.js";
 import {Vector} from "../model/vector.js";
-import { Enemy } from "../model/enemy.js";
-import { updateOverlay } from "../view/renderer.js";
-import { renderMainMenu } from "../view/renderer.js";
-import { Button } from "../model/button.js";
-import { Sound } from "../model/sound.js";
-import { renderOptions } from "../view/renderer.js";
+import {Enemy} from "../model/enemy.js";
+import {updateOverlay} from "../view/renderer.js";
+import {renderMainMenu} from "../view/renderer.js";
+import {Button} from "../model/button.js";
+import {Sound} from "../model/sound.js";
+import {renderOptions} from "../view/renderer.js";
 
 let rightPressed = false;
 let leftPressed = false;
 let frames = 0;
 let mousePos;
-let musik = true;
+let cookieM;
+export let musik = cookieM || true;
+let pauseGameLoop;
+let optionBtn = document.getElementById('options');
 export let buffer = [];
 export let optionBuffer = [];
 export let mainBuffer = [];
@@ -23,13 +26,16 @@ export const states = {
     paused: false,
     run: false,
     running: false,
-    options: false
+    options: false,
+    optionsR: false
 }
+let buttonNames = ['PLAY', 'OPTIONS', 'CONTROLS']
 
 // create paddle object and ball object
 export const paddle = new Paddle(100,6);
 export const ball = new Ball(10,3);
 const soundTrack = new Sound("../assets/sounds/musik.mp3");
+
 
 function soundManager(option) {
     if (states.paused == false && option == true) {
@@ -40,9 +46,21 @@ function soundManager(option) {
     }
 }
 
+optionBtn.addEventListener('click', () => {
+    if(states.running == true && states.paused == true) {
+        states.paused = false;
+        updateOverlay();
+        states.paused = true;
+        states.options = true;
+        states.optionsR = true;
+        optionsMenu();
+        startGame();
+    }
+});
+
 // spawner enemy
 function spawner() {
-    if(frames % 500 === 0) {
+    if(frames % 1000 === 0) {
         buffer.push(new Enemy({position: {x: randN(3,(canvas.width)-50),y: 0},size:{width: 50,height:50}},0.2,2));
         frames = 0;
     }
@@ -64,14 +82,26 @@ canvas.addEventListener("click", function (evt) {
                     states.main = false;
                     optionsMenu();
                     startGame();
+                } else if (Button.index == 2) {
+
                 }
+                const click = new Sound('./assets/sounds/Click.mp3');
+                click.play();
             }
         });
     }
     if (states.options == true) {
         optionBuffer.forEach((Button)=> {
             if (Button.position.x < mousePos.x && Button.position.x + Button.dimentions.width > mousePos.x && Button.position.y < mousePos.y && Button.position.y+Button.dimentions.height > mousePos.y) {
-                if (Button.index == 0) {
+                if (Button.index == 0 && states.optionsR == true) {
+                    states.options = false;
+                    states.optionsR = false
+                    //states.running = false
+                    optionBuffer.splice(0,2);
+                    states.paused = false;
+                    startGame();
+                }
+                else if (Button.index == 0) {
                     states.main = true;
                     states.options = false;
                     optionBuffer.splice(0,2);
@@ -79,21 +109,26 @@ canvas.addEventListener("click", function (evt) {
                 }
                 if(Button.index == 1) {
                     musik = !musik
-                    console.log(musik)
+                    cookieM = musik;
+                    document.cookie = "cookieM";
+                    //console.log(musik)
                 }
+                const click = new Sound('./assets/sounds/Click.mp3');
+                click.play();
             }
         });
+        
     }
 }, false);
 
 function optionsMenu() {
     let numB = 1
     for(let i = 0; i < numB; i++) {
-        let btn = (new Button({position:{x:20,y:canvas.height - 200},dimentions:{width:150,height:75}},'BACK'))
+        let btn = (new Button({position:{x:20,y:canvas.height - 200},dimentions:{width:150,height:75}},'BACK','button'))
         btn.index = i;
         optionBuffer.push(btn);
     }
-    let s = new Button({position:{x:canvas.width/2-75,y:canvas.height/3},dimentions:{width:150,height:75}},'SOUND');
+    let s = new Button({position:{x:canvas.width/2-75,y:canvas.height/3},dimentions:{width:150,height:75}},'SOUND', 'sound');
     s.index = numB;
     optionBuffer.push(s);
 }
@@ -102,7 +137,7 @@ function optionsMenu() {
 function mainMenu() {
     let numB = 3;
     for(let i = 0;i< numB;i++) {
-        let btn = (new Button({position:{x:canvas.width/2-75,y:canvas.height/2 + 80*i-75},dimentions:{width:150,height:75}},'HEJ'))
+        let btn = (new Button({position:{x:canvas.width/2-114,y:canvas.height/2 + 100*i-100},dimentions:{width:228,height:76}},buttonNames[i],'button'))
         btn.index = i;
         mainBuffer.push(btn);
     }
@@ -234,17 +269,23 @@ function movement() {
 // update state based on statemachine mozno som kokot ale takto to ide
 function startGame() {
 if (states.run == true && states.running == false) {
-    console.log('LEN RAZ')
+    //console.log('LEN RAZ')
     states.running = true;
+    
+    // render game
+    GameLoop();
 
+    // start the game
+    physicsGameLoop();
+}
     function GameLoop() {
         renderGame();
-        requestAnimationFrame(GameLoop);
+        pauseGameLoop = requestAnimationFrame(GameLoop);
         if(states.paused == false) {
             spawner();
             frames++;
         }
-        //console.log("runnning")
+        console.log(cookieM)
     }
 
     function physicsGameLoop() {
@@ -266,13 +307,10 @@ if (states.run == true && states.running == false) {
         requestAnimationFrame(loop);
     }
 
-    //create ui loop
+if(states.options == false && states.main == false) {
+    cancelAnimationFrame(pauseGameLoop)
     GameLoop();
-
-    // start the game
-    physicsGameLoop();
 }
-
 if (states.options == true) {
     function Options() {
         requestAnimationFrame(Options);
