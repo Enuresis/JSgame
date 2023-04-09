@@ -13,9 +13,8 @@ let leftPressed = false;
 let twinke = false;
 let frames = 0;
 let mousePos;
-let cookieM;
-let rate;
-export let musik = cookieM || true;
+export let musik =true;
+export let effekt = true;
 let pauseGameLoop;
 let optionBtn = document.getElementById('options');
 export let stars = [];
@@ -36,6 +35,7 @@ let buttonNames = ['PLAY', 'OPTIONS', 'CONTROLS']
 export const paddle = new Paddle(100,6);
 export const ball = new Ball(10,3);
 const soundTrack = new Sound("../assets/sounds/musik.mp3");
+soundTrack.setVolume(0.2);
 
 
 function soundManager(option) {
@@ -94,11 +94,11 @@ canvas.addEventListener("click", function (evt) {
                     states.main = false;
                     optionsMenu();
                     startGame();
-                } else if (Button.index == 2) {
-
                 }
-                const click = new Sound('./assets/sounds/Click.mp3');
-                click.play();
+                if (effekt === true) {
+                    const click = new Sound('./assets/sounds/Click.mp3');
+                    click.play();
+                }
             }
         });
     }
@@ -109,24 +109,28 @@ canvas.addEventListener("click", function (evt) {
                     states.options = false;
                     states.optionsR = false
                     //states.running = false
-                    optionBuffer.splice(0,2);
+                    optionBuffer.splice(0,3);
                     states.paused = false;
                     startGame();
                 }
                 else if (Button.index == 0) {
                     states.main = true;
                     states.options = false;
-                    optionBuffer.splice(0,2);
+                    optionBuffer.splice(0,3);
                     startGame();
                 }
                 if(Button.index == 1) {
                     musik = !musik
-                    cookieM = musik;
-                    document.cookie = "cookieM";
-                    //console.log(musik)
+                    console.log("musik "+musik)
                 }
-                const click = new Sound('./assets/sounds/Click.mp3');
-                click.play();
+                else if(Button.index == 2) {
+                    effekt = !effekt
+                    console.log("effkt " + effekt)
+                }
+                if (effekt === true) {
+                    const click = new Sound('./assets/sounds/Click.mp3');
+                    click.play();
+                }
             }
         });
         
@@ -136,13 +140,16 @@ canvas.addEventListener("click", function (evt) {
 function optionsMenu() {
     let numB = 1
     for(let i = 0; i < numB; i++) {
-        let btn = (new Button({position:{x:20,y:canvas.height - 200},dimentions:{width:150,height:75}},'BACK','button'))
+        let btn = (new Button({position:{x:20,y:canvas.height - 200},dimentions:{width:150,height:75}},'BACK','button'));
         btn.index = i;
         optionBuffer.push(btn);
     }
     let s = new Button({position:{x:canvas.width/2-75,y:canvas.height/3},dimentions:{width:62,height:52}},'SOUND', 'sound');
     s.index = numB;
     optionBuffer.push(s);
+    let e = new Button({position:{x:canvas.width/2-75,y:canvas.height/6},dimentions:{width:62,height:52}},'SOUND', 'effects');
+    e.index = numB+1;
+    optionBuffer.push(e);
 }
 
 // create main menu
@@ -203,7 +210,7 @@ function collision(rect1, rect2) {
     );
 }
 
-// handle movement for objects
+// handle movement for objects and delete enemy upon collision
 function movement() {
     function movePaddle() {
         if (leftPressed && paddle.position.x > 0) {
@@ -264,8 +271,10 @@ function movement() {
     }
     function moveEnemy() {
         buffer.forEach((Enemy,index) => {
-            
-            if(Enemy.position.y > canvas.height) {
+            if (ball.position.x-ball.radius < Enemy.position.x+Enemy.size.width && ball.position.x+ball.radius > Enemy.position.x && ball.position.y+ball.radius < Enemy.position.y+Enemy.size.height && ball.position.y+ball.radius > Enemy.position.y) {
+                buffer.splice(index,1)
+            }
+            else if(Enemy.position.y > canvas.height) {
                 buffer.splice(index,1)
             } else {
                 Enemy.move('crazy');
@@ -273,18 +282,28 @@ function movement() {
         })
     }
     function moveStars() {
-        stars.forEach(paricle=> {
-            rate = Math.round(randN(2,8))
-            paricle.position.x += paricle.velocity.x;
-            paricle.position.y += paricle.velocity.y;
-            //console.log(rate)
-            if (paricle.sparkle && rate % 8 === 0) {
-                paricle.radius = randN(paricle.radius-paricle.radius/5,paricle.radius+0.2)
+        const centerX = canvas.width / 2;
+        const centerY = canvas.height / 2;
+        const startTime = performance.now() / 1000;
+        const rotationSpeed = Math.PI / 2;
+
+        stars.forEach(particle => {
+            const rate = Math.round(randN(2, 8));
+            const distance = Math.sqrt((particle.position.x - centerX) ** 2 + (particle.position.y - centerY) ** 2);
+            const currentAngle = Math.atan2(particle.position.y - centerY, particle.position.x - centerX);
+            const timeElapsed = (performance.now()/1000)-startTime;
+            const newAngle = currentAngle + (timeElapsed*rotationSpeed) / 2;
+            const newX = centerX + distance * Math.cos(newAngle);
+            const newY = centerY + distance * Math.sin(newAngle);
+            particle.position.x = newX;
+            particle.position.y = newY;
+
+            if (particle.sparkle && rate % 8 === 0) {
+                particle.radius = randN(particle.radius - particle.radius / 5, particle.radius + 0.2);
+            } else if (rate % 16 === 0) {
+                particle.radius = randN(particle.radius - particle.radius / 5, particle.radius + 0.2);
             }
-            else if (rate % 16 == 0) {
-                paricle.radius = randN(paricle.radius-paricle.radius/5,paricle.radius+0.2)
-            } 
-        })
+        });
     }
     // call individual moves
     moveEnemy();

@@ -1,9 +1,10 @@
-import { musik, paddle,stars,ball,states,buffer,mainBuffer,optionBuffer} from "../controller/gameloop.js";
+import { musik, paddle,stars,ball,states,buffer,mainBuffer,optionBuffer, effekt} from "../controller/gameloop.js";
 
 
-export let canvas = document.querySelector('canvas')
-export let ctx = canvas.getContext("2d")
+export const canvas = document.querySelector('canvas')
+export const ctx = canvas.getContext("2d")
 
+canvas.style.imageRendering = "pixelated";
 
 //clear the canvas
 function clearCanvas() {
@@ -11,15 +12,16 @@ function clearCanvas() {
 }
 
 function renderEnemy() {
-    //console.log(buffer);
     for(let i = 0;i< buffer.length;i++) {
+        const image = new Image();
         if (buffer[i].name === 'crazy') {
-            ctx.fillStyle = 'yellow';
+            image.src = './assets/enemy/shipYellow_manned.png';
+            //ctx.fillRect(buffer[i].position.x, buffer[i].position.y, buffer[i].size.width, buffer[i].size.height);
+            ctx.drawImage(image,buffer[i].position.x,buffer[i].position.y,buffer[i].size.width,buffer[i].size.height)
         } else {
             ctx.fillStyle = 'red';
+            ctx.fillRect(buffer[i].position.x, buffer[i].position.y, buffer[i].size.width, buffer[i].size.height);
         }
-        
-        ctx.fillRect(buffer[i].position.x, buffer[i].position.y, buffer[i].size.width, buffer[i].size.height);
     }
 }
 
@@ -50,6 +52,15 @@ function renderButton(buffer) {
         if (Button.type == 'sound') {
             const image = new Image()
             if (musik) {
+                image.src = './assets/icons/35.png'
+            } else {
+                image.src = './assets/icons/34.png'
+            }
+            ctx.drawImage(image,Button.position.x,Button.position.y,Button.dimentions.width,Button.dimentions.height)
+        } 
+        else if (Button.type == 'effects') {
+            const image = new Image()
+            if (effekt) {
                 image.src = './assets/icons/35.png'
             } else {
                 image.src = './assets/icons/34.png'

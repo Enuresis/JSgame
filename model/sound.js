@@ -13,4 +13,7 @@ export class Sound {
     stop() {
         this.sound.pause();
     }
+    setVolume(volume) {
+        this.sound.volume = volume;
+    }
 }
