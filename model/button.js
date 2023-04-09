@@ -1,5 +1,3 @@
-import {canvas} from "../view/renderer.js";
-
 export class Button{
     constructor({position,dimentions},name,type) {
         this.position = position;

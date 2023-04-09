@@ -1,4 +1,4 @@
-import {renderGame,canvas,updateOverlay,renderMainMenu,renderOptions} from "../view/renderer.js";
+import {renderGame,canvas,updateOverlay,renderMainMenu,renderOptions, renderControls} from "../view/renderer.js";
 import {Paddle} from "../model/paddle.js";
 import {Ball} from "../model/ball.js";
 import {Vector} from "../model/vector.js";
@@ -21,13 +21,16 @@ export let stars = [];
 export let buffer = [];
 export let optionBuffer = [];
 export let mainBuffer = [];
+export let ctrBuffer = [];
 export const states = {
     main: true,
     paused: false,
     run: false,
     running: false,
     options: false,
-    optionsR: false
+    optionsR: false,
+    over: false,
+    controls: false
 }
 let buttonNames = ['PLAY', 'OPTIONS', 'CONTROLS']
 
@@ -39,10 +42,10 @@ soundTrack.setVolume(0.2);
 
 
 function soundManager(option) {
-    if (states.paused == false && option == true) {
+    if (states.paused == false || states.over == false && option == true) {
         soundTrack.play();
     }
-    if (states.paused == true || option == false) {
+    if (states.paused == true || option == false || states.over == true) {
         soundTrack.stop();
     }
 }
@@ -92,7 +95,16 @@ canvas.addEventListener("click", function (evt) {
                     states.options = true;
                     states.run = false;
                     states.main = false;
+                    states.controls = false;
                     optionsMenu();
+                    startGame();
+                } else if (Button.index == 2) {
+                    states.controls = true;
+                    states.run = false;
+                    states.options = false;
+                    states.main = false;
+                    console.log(states.run)
+                    controlMenu();
                     startGame();
                 }
                 if (effekt === true) {
@@ -133,9 +145,30 @@ canvas.addEventListener("click", function (evt) {
                 }
             }
         });
-        
+    }
+    if (states.controls == true) {
+        ctrBuffer.forEach((Button)=> {
+            if (Button.position.x < mousePos.x && Button.position.x + Button.dimentions.width > mousePos.x && Button.position.y < mousePos.y && Button.position.y+Button.dimentions.height > mousePos.y) {
+                if (Button.index == 0) {
+                    states.main = true;
+                    states.controls = false;
+                    ctrBuffer.splice(0,1);
+                    startGame();
+                }
+                if (effekt === true) {
+                    const click = new Sound('./assets/sounds/Click.mp3');
+                    click.play();
+                }
+            }
+        });
     }
 }, false);
+
+function controlMenu() {
+    let btn = (new Button({position:{x:20,y:canvas.height - 200},dimentions:{width:150,height:75}},'BACK','button'));
+    btn.index = 0;
+    ctrBuffer.push(btn);
+}
 
 function optionsMenu() {
     let numB = 1
@@ -147,11 +180,10 @@ function optionsMenu() {
     let s = new Button({position:{x:canvas.width/2-75,y:canvas.height/3},dimentions:{width:62,height:52}},'SOUND', 'sound');
     s.index = numB;
     optionBuffer.push(s);
-    let e = new Button({position:{x:canvas.width/2-75,y:canvas.height/6},dimentions:{width:62,height:52}},'SOUND', 'effects');
+    let e = new Button({position:{x:canvas.width/2-75,y:canvas.height/6},dimentions:{width:62,height:52}},'EFFECTS', 'effects');
     e.index = numB+1;
     optionBuffer.push(e);
 }
-
 // create main menu
 function mainMenu() {
     let numB = 3;
@@ -173,10 +205,20 @@ function getMousePos(evt) {
 function randN(min, max) {
     return Math.random() * (max - min) + min;
 }
-// escape key
+
+document.addEventListener('keydown',(event) => {
+    if (event.key === 'g') {
+        if (states.main == false && states.options == false && states.paused == false && states.controls == false) {
+            states.over = true
+        }
+        updateOverlay('over');
+    }
+});
+
+// escape key pAUSE
 document.addEventListener('keydown', (event) => {
     if (event.key === 'Escape') {
-      if(states.main == false && states.options == false) {
+      if(states.main == false && states.options == false && states.over == false && states.controls == false) {
         states.paused = !states.paused;
       } 
         updateOverlay();
@@ -328,7 +370,8 @@ if (states.run == true && states.running == false) {
     function GameLoop() {
         renderGame();
         pauseGameLoop = requestAnimationFrame(GameLoop);
-        if(states.paused == false) {
+        if(states.paused == false && states.over == false) {
+            //console.log(states.run)
             spawner();
             frames++;
         }
@@ -340,7 +383,7 @@ if (states.run == true && states.running == false) {
             const deltaTime = (timestamp - lastTimestamp) / 1000; 
             lastTimestamp = timestamp;
     
-            if (!states.paused) {
+            if (!states.paused && !states.over) {
                 movement(deltaTime);
                 soundManager(musik);
             } else {
@@ -353,7 +396,7 @@ if (states.run == true && states.running == false) {
         requestAnimationFrame(loop);
     }
 
-if(states.options == false && states.main == false) {
+if(states.options == false && states.main == false && states.controls == false) {
     cancelAnimationFrame(pauseGameLoop)
     GameLoop();
 }
@@ -371,6 +414,13 @@ if (states.main == true) {
         renderMainMenu();
     }
     Menu();
+}
+if (states.controls == true) {
+    function ctr() {
+        requestAnimationFrame(ctr)
+        renderControls();
+    }
+    ctr();
 }
 
 }

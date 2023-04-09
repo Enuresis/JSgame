@@ -5,6 +5,18 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <title>GAME</title>
     <style>
+    #over {
+        position: fixed;
+        display: none;
+        width: 100%;
+        height: 100%;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: rgba(0,0,0,0.5);
+        z-index: 2;
+    }
     #overlay {
         position: fixed;
         display: none;
@@ -42,6 +54,10 @@
         <div id="text">PAUSED!!</div>
         <button type="button" onclick="window.location.reload()">QUIT</button>
         <button type="button" id="options">OPTIONS</button>
+    </div>
+    <div id="over">
+        <div id="text">GAME OVER!!</div>
+        <button type="button" onclick="window.location.reload()">QUIT</button>
       </div>
     <div id="canv">
         <canvas id="myCanvas" width="700" height="800"></canvas>
@@ -51,6 +67,5 @@
     <script type="module" src="/model/paddle.js"></script>
     <script type="module" src="/model/ball.js"></script>
     <script type="module" src="/model/vector.js"></script>
-    
 </body>
 </html>

@@ -1,10 +1,16 @@
-import { musik, paddle,stars,ball,states,buffer,mainBuffer,optionBuffer, effekt} from "../controller/gameloop.js";
+import { musik, paddle,stars,ball,states,buffer,mainBuffer,optionBuffer, effekt, ctrBuffer} from "../controller/gameloop.js";
 
 
 export const canvas = document.querySelector('canvas')
 export const ctx = canvas.getContext("2d")
 
 canvas.style.imageRendering = "pixelated";
+const ctrl = new Image();
+ctrl.src = './assets/ctrl/constrolsSpriteSheet.png';
+const spriteW = 16800 / 56
+const spriteH = 250;
+let framex = 0;
+let gameframe = 0;
 
 //clear the canvas
 function clearCanvas() {
@@ -39,11 +45,19 @@ function renderBall(ball) {
         ctx.closePath()
 }
 // render pause
-export function updateOverlay() {
-    if (states.paused) {
-      document.getElementById("overlay").style.display = "block";
+export function updateOverlay(type) {
+    if (type == 'over') {
+        if (states.over) {
+            document.getElementById("over").style.display = "block";
+        } else {
+            document.getElementById("over").style.display = "none";
+        }
     } else {
-      document.getElementById("overlay").style.display = "none";
+        if (states.paused) {
+            document.getElementById("overlay").style.display = "block";
+        } else {
+            document.getElementById("overlay").style.display = "none";
+        }
     }
 }
 
@@ -57,6 +71,9 @@ function renderButton(buffer) {
                 image.src = './assets/icons/34.png'
             }
             ctx.drawImage(image,Button.position.x,Button.position.y,Button.dimentions.width,Button.dimentions.height)
+            ctx.fillStyle = 'white';
+            ctx.font = "40px Georgia";
+            ctx.fillText(Button.name, Button.position.x - 200, Button.position.y+Button.dimentions.height/2+15);
         } 
         else if (Button.type == 'effects') {
             const image = new Image()
@@ -66,13 +83,16 @@ function renderButton(buffer) {
                 image.src = './assets/icons/34.png'
             }
             ctx.drawImage(image,Button.position.x,Button.position.y,Button.dimentions.width,Button.dimentions.height)
+            ctx.fillStyle = 'white';
+            ctx.font = "40px Georgia";
+            ctx.fillText(Button.name, Button.position.x - 200, Button.position.y+Button.dimentions.height/2+15);
         }
         else if (Button.type == 'button') {
             const image = new Image()
             image.src = './assets/icons/ButtonNormal.png'
             ctx.drawImage(image,Button.position.x,Button.position.y,Button.dimentions.width,Button.dimentions.height)
             ctx.fillStyle = 'white';
-            ctx.font = "40px serif";
+            ctx.font = "40px Georgia";
             ctx.fillText(Button.name, Button.position.x, Button.position.y+Button.dimentions.height/2+15);
         }
         else {
@@ -80,7 +100,7 @@ function renderButton(buffer) {
             ctx.fillRect(Button.position.x, Button.position.y, Button.dimentions.width, Button.dimentions.height);
             //console.log(Button);
             ctx.fillStyle = 'white';
-            ctx.font = "48px serif";
+            ctx.font = "48px Georgia";
             ctx.fillText(Button.name, Button.position.x+Button.dimentions.width/2, Button.position.y+Button.dimentions.height/2);
         }
     });
@@ -117,4 +137,15 @@ export function renderOptions() {
 export function renderMainMenu() {
     clearCanvas();
     renderButton(mainBuffer);
+}
+export function renderControls() {
+    clearCanvas();
+    renderButton(ctrBuffer);
+    ctx.drawImage(ctrl,framex* spriteW,0,spriteW,spriteH,0,0,spriteW*2.4,spriteH*2);
+    if (gameframe % 9 == 0) {
+        if (framex < 55) framex++;
+        else framex = 0;
+        gameframe = 0;
+    }
+    gameframe++;
 }
