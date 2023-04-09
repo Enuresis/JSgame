@@ -1,4 +1,4 @@
-import {renderGame,canvas,updateOverlay,renderMainMenu,renderOptions, renderControls} from "../view/renderer.js";
+import {renderGame,canvas,updateOverlay,renderMainMenu,renderOptions, renderControls,renderLeader} from "../view/renderer.js";
 import {Paddle} from "../model/paddle.js";
 import {Ball} from "../model/ball.js";
 import {Vector} from "../model/vector.js";
@@ -22,6 +22,7 @@ export let buffer = [];
 export let optionBuffer = [];
 export let mainBuffer = [];
 export let ctrBuffer = [];
+export let scoreBuffer = [];
 export const states = {
     main: true,
     paused: false,
@@ -30,9 +31,10 @@ export const states = {
     options: false,
     optionsR: false,
     over: false,
-    controls: false
+    controls: false,
+    score: false
 }
-let buttonNames = ['PLAY', 'OPTIONS', 'CONTROLS']
+let buttonNames = ['PLAY', 'OPTIONS', 'CONTROLS', 'LEADERBOARD'];
 
 // create paddle object and ball object
 export const paddle = new Paddle(100,6);
@@ -106,6 +108,15 @@ canvas.addEventListener("click", function (evt) {
                     console.log(states.run)
                     controlMenu();
                     startGame();
+                } else if (Button.index == 3) {
+                    states.score = true
+                    states.controls = false;
+                    states.run = false;
+                    states.options = false;
+                    states.main = false;
+                    console.log(states.run)
+                    leaderMenu();
+                    startGame();
                 }
                 if (effekt === true) {
                     const click = new Sound('./assets/sounds/Click.mp3');
@@ -162,7 +173,29 @@ canvas.addEventListener("click", function (evt) {
             }
         });
     }
+    if (states.score == true) {
+        scoreBuffer.forEach((Button)=> {
+            if (Button.position.x < mousePos.x && Button.position.x + Button.dimentions.width > mousePos.x && Button.position.y < mousePos.y && Button.position.y+Button.dimentions.height > mousePos.y) {
+                if (Button.index == 0) {
+                    states.main = true;
+                    states.score = false;
+                    scoreBuffer.splice(0,1);
+                    startGame();
+                }
+                if (effekt === true) {
+                    const click = new Sound('./assets/sounds/Click.mp3');
+                    click.play();
+                }
+            }
+        });
+    }
 }, false);
+
+function leaderMenu() {
+    let btn = (new Button({position:{x:20,y:canvas.height - 200},dimentions:{width:150,height:75}},'BACK','button'));
+    btn.index = 0;
+    scoreBuffer.push(btn);
+}
 
 function controlMenu() {
     let btn = (new Button({position:{x:20,y:canvas.height - 200},dimentions:{width:150,height:75}},'BACK','button'));
@@ -186,7 +219,7 @@ function optionsMenu() {
 }
 // create main menu
 function mainMenu() {
-    let numB = 3;
+    let numB = 4;
     for(let i = 0;i< numB;i++) {
         let btn = (new Button({position:{x:canvas.width/2-114,y:canvas.height/2 + 100*i-100},dimentions:{width:228,height:76}},buttonNames[i],'button'))
         btn.index = i;
@@ -208,7 +241,7 @@ function randN(min, max) {
 
 document.addEventListener('keydown',(event) => {
     if (event.key === 'g') {
-        if (states.main == false && states.options == false && states.paused == false && states.controls == false) {
+        if (states.main == false && states.options == false && states.paused == false && states.controls == false && states.score == false) {
             states.over = true
         }
         updateOverlay('over');
@@ -218,17 +251,19 @@ document.addEventListener('keydown',(event) => {
 // escape key pAUSE
 document.addEventListener('keydown', (event) => {
     if (event.key === 'Escape') {
-      if(states.main == false && states.options == false && states.over == false && states.controls == false) {
+      if(states.main == false && states.options == false && states.over == false && states.controls == false && states.score == false) {
         states.paused = !states.paused;
       } 
         updateOverlay();
     }
 });
+
 // switch to main menu and create it
 document.addEventListener("DOMContentLoaded", (event) => {
     states.main = true;
     mainMenu();
 });
+
 // handle states
 function statemachine() {
     if (states.paused) {
@@ -396,7 +431,7 @@ if (states.run == true && states.running == false) {
         requestAnimationFrame(loop);
     }
 
-if(states.options == false && states.main == false && states.controls == false) {
+if(states.options == false && states.main == false && states.controls == false && states.score == false) {
     cancelAnimationFrame(pauseGameLoop)
     GameLoop();
 }
@@ -421,6 +456,13 @@ if (states.controls == true) {
         renderControls();
     }
     ctr();
+}
+if (states.score == true) {
+    function scr() {
+        requestAnimationFrame(scr);
+        renderLeader();
+    }
+    scr();
 }
 
 }

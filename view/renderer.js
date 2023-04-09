@@ -1,4 +1,4 @@
-import { musik, paddle,stars,ball,states,buffer,mainBuffer,optionBuffer, effekt, ctrBuffer} from "../controller/gameloop.js";
+import { musik, paddle,stars,ball,states,buffer,mainBuffer,optionBuffer, effekt, ctrBuffer, scoreBuffer} from "../controller/gameloop.js";
 
 
 export const canvas = document.querySelector('canvas')
@@ -132,6 +132,11 @@ export function renderGame() {
 export function renderOptions() {
     clearCanvas();
     renderButton(optionBuffer);
+}
+
+export function renderLeader() {
+    clearCanvas();
+    renderButton(scoreBuffer);
 }
 
 export function renderMainMenu() {

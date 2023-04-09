@@ -37,7 +37,30 @@
         color: white;
         transform: translate(-50%,-50%);
         -ms-transform: translate(-50%,-50%);
-    }   
+    }
+    .buttons {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        height: 120vh;
+    }
+    button {
+        background-color: #00FF00; 
+        color: #000000; 
+        font-size: 1.5rem; 
+        padding: 10px 20px; 
+        border: 2px solid #FF00FF; 
+        border-radius: 20px; 
+        box-shadow: 0px 0px 10px #FF00FF; 
+    }
+
+    button:hover {
+        background-color: #FF00FF; 
+        color: #000000;
+        border: 2px solid #00FF00; 
+        box-shadow: 0px 0px 20px #00FF00; 
+    }
     </style>
 </head>
 <style>
@@ -52,12 +75,16 @@
 <body>
     <div id="overlay">
         <div id="text">PAUSED!!</div>
-        <button type="button" onclick="window.location.reload()">QUIT</button>
-        <button type="button" id="options">OPTIONS</button>
+            <div class="buttons">
+                <button type="button" id="options">OPTIONS</button>
+                <button type="button" onclick="window.location.reload()">QUIT</button>
+            </div>
     </div>
     <div id="over">
         <div id="text">GAME OVER!!</div>
-        <button type="button" onclick="window.location.reload()">QUIT</button>
+            <div class="buttons">
+                <button type="button" onclick="window.location.reload()">QUIT</button>
+            </div>
       </div>
     <div id="canv">
         <canvas id="myCanvas" width="700" height="800"></canvas>
