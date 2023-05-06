@@ -14,6 +14,14 @@ export class Paddle {
             x: 0,
             y: 0
         }
+        this.coll = {
+            w: size,
+            h: 10
+        }
+        this.collPos = {
+            x: canvas.width/2,
+            y: canvas.height - 50
+        }
     }
     moveLeft() {
         this.position.x -= this.moveSpeed;

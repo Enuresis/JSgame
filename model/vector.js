@@ -32,13 +32,15 @@ export class Vector {
       const mag = this.magnitude();
       return mag > 0 ? this.divide(mag) : new Vector();
     }
-  
+
     reflect(normal) {
       return this.subtract(normal.multiply(2 * this.dot(normal)));
     }
+
     length() {
       return Math.sqrt(this.x * this.x + this.y * this.y);
     }
+    
     scale(other) {
       return new Vector(this.x * other,this.y * other)
     }
