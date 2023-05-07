@@ -1,16 +1,21 @@
-import { musik, paddle,stars,ball,states,buffer,mainBuffer,optionBuffer, effekt, ctrBuffer, scoreBuffer,life,score,scoreText} from "../controller/gameloop.js";
+import { musik, paddle,stars,ball,states,buffer,mainBuffer,optionBuffer, effekt, ctrBuffer, scoreBuffer,life,score,scoreText,leaderboard} from "../controller/gameloop.js";
 
 
 export const canvas = document.querySelector('canvas')
 export const ctx = canvas.getContext("2d")
 
 canvas.style.imageRendering = "pixelated";
-const ctrl = new Image();
+const ctrl = new Image;
 ctrl.src = './assets/ctrl/constrolsSpriteSheet.png';
 const spriteW = 16800 / 56
 const spriteH = 250;
-let framex = 0;
+let framex = 16;
 let gameframe = 0;
+let rotationAngle = 0;
+let textX = canvas.width / 2;
+let textY = canvas.height / 2;
+
+
 
 //clear the canvas
 function clearCanvas() {
@@ -86,7 +91,7 @@ function renderButton(buffer) {
             ctx.drawImage(image,Button.position.x,Button.position.y,Button.dimentions.width,Button.dimentions.height)
             ctx.fillStyle = 'white';
             ctx.font = "40px Georgia";
-            ctx.fillText(Button.name, Button.position.x - 200, Button.position.y+Button.dimentions.height/2+15);
+            ctx.fillText(Button.name, Button.position.x / 3, Button.position.y+Button.dimentions.height/2+15);
         } 
         else if (Button.type == 'effects') {
             const image = new Image()
@@ -98,7 +103,7 @@ function renderButton(buffer) {
             ctx.drawImage(image,Button.position.x,Button.position.y,Button.dimentions.width,Button.dimentions.height)
             ctx.fillStyle = 'white';
             ctx.font = "40px Georgia";
-            ctx.fillText(Button.name, Button.position.x - 200, Button.position.y+Button.dimentions.height/2+15);
+            ctx.fillText(Button.name, Button.position.x/3.2, Button.position.y+Button.dimentions.height/2+15);
         }
         else if (Button.type == 'button') {
             const image = new Image()
@@ -106,7 +111,8 @@ function renderButton(buffer) {
             ctx.drawImage(image,Button.position.x,Button.position.y,Button.dimentions.width,Button.dimentions.height)
             ctx.fillStyle = 'white';
             ctx.font = "40px Georgia";
-            ctx.fillText(Button.name, Button.position.x, Button.position.y+Button.dimentions.height/2+15);
+            const textWidth = ctx.measureText(Button.name).width;
+            ctx.fillText(Button.name, Button.position.x + Button.dimentions.width / 2 - textWidth / 2, Button.position.y+Button.dimentions.height/2+15);
         }
         else {
             ctx.fillStyle = 'red';
@@ -114,11 +120,13 @@ function renderButton(buffer) {
             //console.log(Button);
             ctx.fillStyle = 'white';
             ctx.font = "48px Georgia";
-            ctx.fillText(Button.name, Button.position.x+Button.dimentions.width/2, Button.position.y+Button.dimentions.height/2);
+            const textWidth = ctx.measureText(Button.name).width;
+            ctx.fillText(Button.name, Button.position.x + Button.dimentions.width / 2 - textWidth / 2, Button.position.y+Button.dimentions.height/2);
         }
     });
     //console.log(mainBuffer);
 }
+
 
 function renderParticles() {
     stars.forEach(particle => {
@@ -154,6 +162,38 @@ function renderScoreText() {
     })
 }
 
+function renderTop() {
+    for (let i = 0; i < Math.min(leaderboard.length, 3); i++) {
+        const entry = leaderboard[i];
+        const text = `${i + 1}. ${entry.name} ${entry.score}`;
+      
+        const maxFontSize = 70;
+        const minFontSize = 30;
+        const fontSize = maxFontSize - i * (maxFontSize - minFontSize) / 2;
+      
+        ctx.font = `${fontSize}px Arial`;
+        ctx.fillStyle = i === 0 ? "gold" : (i === 1 ? "silver" : "peru");
+      
+        const textWidth = ctx.measureText(text).width;
+        const x = canvas.width / 2 - textWidth / 2;
+        const y = canvas.height / 3 + i * 70;
+      
+        ctx.fillText(text, x, y);
+      }
+}
+function mainText() {
+    ctx.save();
+    ctx.translate(textX, textY);
+    ctx.rotate(rotationAngle * Math.PI / 180);
+    ctx.textAlign = "center";
+    ctx.fillText("Alien Break", 0, 0);
+    ctx.restore();
+    
+    // Update the rotation angle and position
+    rotationAngle += 2;
+    textX += Math.sin(rotationAngle * Math.PI / 180);
+    textY += Math.cos(rotationAngle * Math.PI / 180);
+}
 // render on screen
 export function renderGame() {
     clearCanvas();
@@ -175,10 +215,12 @@ export function renderOptions() {
 export function renderLeader() {
     clearCanvas();
     renderButton(scoreBuffer);
+    renderTop();
 }
 
 export function renderMainMenu() {
     clearCanvas();
+    mainText();
     renderButton(mainBuffer);
 }
 export function renderControls() {

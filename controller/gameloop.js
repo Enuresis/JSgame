@@ -7,11 +7,9 @@ import {Button} from "../model/button.js";
 import {Sound} from "../model/sound.js";
 import { Particle } from "../model/particle.js";
 
-
 let rightPressed = false;
 let leftPressed = false;
 let twinke = false;
-let inv = 0;
 let invTimeout;
 let invincible = false;
 let frames = 0;
@@ -19,6 +17,7 @@ let mousePos;
 let advancment = 0;
 let spawnInterval = 500;
 let chance = 1.00;
+let kokot;
 export let score = 0;
 export let musik = true;
 export let effekt = true;
@@ -31,7 +30,8 @@ export let mainBuffer = [];
 export let ctrBuffer = [];
 export let scoreBuffer = [];
 export let scoreText = [];
-let ballS= 4.5;
+export let leaderboard;
+let ballS= 10;
 export const states = {
     main: true,
     paused: false,
@@ -45,7 +45,7 @@ export const states = {
     time: false
 }
 export let life = 3;
-let buttonNames = ['PLAY', 'OPTIONS', 'CONTROLS', 'LEADERBOARD'];
+let buttonNames = ['PLAY', 'OPTIONS', 'CONTROLS', 'SCORE'];
 
 // create paddle object and ball object
 export const paddle = new Paddle(100,6);
@@ -53,6 +53,19 @@ export const ball = new Ball(10,ballS);
 const soundTrack = new Sound("/game/assets/sounds/musik.mp3");
 soundTrack.setVolume(0.2);
 
+export function updateLeaderboard(name) {
+    leaderboard = JSON.parse(localStorage.getItem("leaderboard")) || [];
+    
+    leaderboard.push({ name, score });
+    
+    leaderboard.sort((a, b) => b.score - a.score);
+    
+    leaderboard = leaderboard.slice(0, 3);
+    
+    localStorage.setItem("leaderboard", JSON.stringify(leaderboard));
+
+    kokot = leaderboard.map(entry => `${entry.name}: ${entry.score}`);
+}
 
 function bulletTime() {
     document.addEventListener("keydown", function (evt) {
@@ -451,11 +464,8 @@ function movement() {
                                 buffer.splice(index,1)
                                 scoreText.push(new Particle({position: {x:Enemy.position.x,y:Enemy.position.y},velocity:{x:-0.5,y:-0.5}},Math.random()*1,'white'))
                             }
-                        
                     }
-                    //console.log('LOOOL')
-                
-                
+                    //console.log('LOOOL')                
             }
             else if(Enemy.position.y > canvas.height) {
                 buffer.splice(index,1)
@@ -538,6 +548,7 @@ if (states.run == true && states.running == false) {
             const deltaTime = (timestamp - lastTimestamp) / 1000; 
             lastTimestamp = timestamp;
             bulletTime();
+            console.log(kokot)
             if (!states.paused && !states.over && !states.time) {
                 moveScoreParticles();
                 movement(deltaTime);
@@ -567,6 +578,7 @@ if (states.options == true) {
 if (states.main == true) {
     function Menu() {
         requestAnimationFrame(Menu);
+        console.log(kokot)
         renderMainMenu();
     }
     Menu();
