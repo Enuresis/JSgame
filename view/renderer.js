@@ -3,19 +3,13 @@ import { musik, paddle,stars,ball,states,buffer,mainBuffer,optionBuffer, effekt,
 
 export const canvas = document.querySelector('canvas')
 export const ctx = canvas.getContext("2d")
-
 canvas.style.imageRendering = "pixelated";
-const ctrl = new Image;
-ctrl.src = './assets/ctrl/constrolsSpriteSheet.png';
-const spriteW = 16800 / 56
-const spriteH = 250;
-let framex = 16;
-let gameframe = 0;
-let angle = 0;
-let rotationDirection = 1;
-let lastAngle = 0;
-let scaleDirection = 1;
-let scale = 1;
+const inst = new Image;
+inst.src = './assets/ctrl/INSCTRUCTIONS.png';
+const catch_zone = new Image();
+catch_zone.src = './assets/paddle/catch_zone.png'
+const heart = new Image();
+heart.src = './assets/icons/lifeeees.png'
 const explosionImage = new Image();
 explosionImage.src = "./assets/enemy/yellow_effects.png";
 const title = new Image();
@@ -62,8 +56,9 @@ function renderPaddle(paddle) {
     ctx.fillRect(paddle.position.x, paddle.position.y, paddle.width, paddle.height);
 }
 function renderPddle(paddle) {
-    ctx.fillStyle = 'red';
-    ctx.fillRect(paddle.position.x, paddle.position.y-15, paddle.width, paddle.height+5);
+    //ctx.fillStyle = 'blue';
+    //ctx.fillRect(paddle.position.x, paddle.position.y-50, paddle.width, paddle.height+40);
+    ctx.drawImage(catch_zone,paddle.position.x,paddle.position.y-catch_zone.height);
 }
 // render ball
 function renderBall(ball) {
@@ -153,8 +148,7 @@ function renderParticles() {
 
 function renderHearts() {
     for(let i = 0;i<life;i++) {
-        ctx.fillStyle = 'red';
-        ctx.fillRect(0+i*25, 0, 20, 20);
+        ctx.drawImage(heart,0+i*50,0,heart.width,heart.height);
     }
 }
 function renderExplosion() {
@@ -182,7 +176,7 @@ function renderExplosion() {
             32*2
           );
         }
-    }) 
+    })
 }
 function renderScore() {
     ctx.fillText(score, canvas.width/2, 30);
@@ -218,27 +212,12 @@ function renderTop() {
       }
 }
 function mainText() {
-    angle += 0.00001 * rotationDirection;
-    if (angle >= 10 || angle <= -10) {
-      rotationDirection *= -1;
-    }
-    
-    scale += 0.01 * scaleDirection;
-    if (scale >= 1.5 || scale <= 0.5) {
-      scaleDirection *= -1;
-    }
 
-    if (angle !== lastAngle || scale !== lastScale) {
+
       ctx.save();
       ctx.translate(canvas.width/2, canvas.height / 5);
-      ctx.rotate(angle * Math.PI / 180);
       ctx.drawImage(title, -title.width / 2, -title.height / 2);
-      ctx.scale(scale, scale);
       ctx.restore();
-      lastAngle = angle;
-    }
-  
-    rottext = requestAnimationFrame(mainText);
   }
 // render on screen
 export function renderGame() {
@@ -273,11 +252,7 @@ export function renderMainMenu() {
 export function renderControls() {
     clearCanvas();
     renderButton(ctrBuffer);
-    ctx.drawImage(ctrl,framex* spriteW,0,spriteW,spriteH,0,0,spriteW*2.4,spriteH*2);
-    if (gameframe % 9 == 0) {
-        if (framex < 55) framex++;
-        else framex = 0;
-        gameframe = 0;
-    }
-    gameframe++;
+    ctx.fillStyle = 'gray'
+    ctx.fillRect(20,20,canvas.width-40,500);
+    ctx.drawImage(inst,20,20)
 }

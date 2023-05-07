@@ -93,7 +93,6 @@
                     <input type="text" id="name" name="name" required>
                     <button type="submit">Submit</button>
                   </form>
-                <button type="button" onclick="window.location.reload()">QUIT</button>
             </div>
       </div>
     <div id="canv">
@@ -104,14 +103,16 @@
         window.submitForm = function (event) {
             event.preventDefault();
             const name = document.getElementById("name").value;
-            updateLeaderboard(name);
+            updateLeaderboard(name,true);
             alert(`Thank you for submitting your score, ${name}!`);
             console.log('dsa')
             event.target.reset();
         }
+
         window.addEventListener('DOMContentLoaded', (event) => {
-    updateLeaderboard(); // call function to update leaderboard with saved data
-  });
+            updateLeaderboard(); // call function to update leaderboard with saved data
+        });
+
     </script>
 </body>
 </html>

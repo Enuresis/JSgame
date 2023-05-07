@@ -1,4 +1,4 @@
-import {renderGame,canvas,updateOverlay,renderMainMenu,renderOptions, renderControls,renderLeader,rottext,ctx} from "../view/renderer.js";
+import {renderGame,canvas,updateOverlay,renderMainMenu,renderOptions, renderControls,renderLeader} from "../view/renderer.js";
 import {Paddle} from "../model/paddle.js";
 import {Ball} from "../model/ball.js";
 import {Vector} from "../model/vector.js";
@@ -6,6 +6,7 @@ import {Enemy} from "../model/enemy.js";
 import {Button} from "../model/button.js";
 import {Sound} from "../model/sound.js";
 import { Particle } from "../model/particle.js";
+import { AudioPool } from "../model/poolAudio.js";
 
 export const explosions = []
 
@@ -56,9 +57,12 @@ let buttonNames = ['PLAY', 'OPTIONS', 'CONTROLS', 'SCORE'];
 export const paddle = new Paddle(100,6);
 export const ball = new Ball(10,ballS);
 const soundTrack = new Sound("/game/assets/sounds/musik.mp3");
-soundTrack.setVolume(0.2);
+soundTrack.setVolume(0.1);
+let hitSound = new AudioPool('/game/assets/sounds/explozia.wav', 5);
 
-export function updateLeaderboard(name) {
+
+
+export function updateLeaderboard(name,juh) {
     leaderboard = JSON.parse(localStorage.getItem("leaderboard")) || [];
     
     leaderboard.push({ name, score });
@@ -70,12 +74,15 @@ export function updateLeaderboard(name) {
     localStorage.setItem("leaderboard", JSON.stringify(leaderboard));
 
     leaderboard.map(entry => `${entry.name}: ${entry.score}`);
+    if (juh == true) {
+        window.location.reload();
+    }
 }
 
 function bulletTime() {
     document.addEventListener("keydown", function (evt) {
         if (evt.code === 'Space') {
-            if (ball.position.x-ball.radius < paddle.position.x+paddle.width && ball.position.x+ball.radius > paddle.position.x && ball.position.y+ball.radius < paddle.position.y+paddle.height+10 && ball.position.y+ball.radius > paddle.position.y -15) {
+            if (ball.position.x-ball.radius < paddle.position.x+paddle.width && ball.position.x+ball.radius > paddle.position.x && ball.position.y+ball.radius < paddle.position.y+paddle.height+40 && ball.position.y+ball.radius > paddle.position.y -50) {
                 states.time = true;
                 ball.position.x = paddle.position.x + paddle.width/2;
                 ball.position.y = paddle.position.y - 30
@@ -94,7 +101,7 @@ function dlife() {
     buffer.forEach((Enemy,index) => {
         if(Enemy.position.y > canvas.height) {
             if (life > 0) {
-                life -= 0;
+                life -= 1;
             }
             buffer.splice(index,1)
         }
@@ -150,16 +157,16 @@ function spawner() {
             //console.log(chance)
             //console.log(advancment)
         }
-        if (advancment > 1 && chosenValue == 2) {
+        if (advancment > 1 && chosenValue == 1) {
             buffer.push(new Enemy({position: {x: randN(3,(canvas.width)-50),y: 0},size:{width: 50,height:50}},0.2,1,2));
             //console.log(chance)
         }
         if (chance > 0.2 && advancment > 8) {
-            chance = chance-0.05;
+            chance = chance-0.005;
         }
-        //console.log(spawnInterval)
-        if (spawnInterval > 200) {
-            spawnInterval -= 5;
+        console.log(spawnInterval)
+        if (spawnInterval > 150) {
+            spawnInterval -= 10;
         }
         advancment++;
         frames = 0;
@@ -290,7 +297,6 @@ function moveScoreParticles() {
         particle.position.x += particle.velocity.x;
         particle.position.y += particle.velocity.y;
         particle.opacity -= 0.02;
-        //particle.fade();
 
         if (particle.opacity < 0) {
             scoreText.splice(index,1);
@@ -417,6 +423,18 @@ function movement() {
         if (position.y - ball.radius< 0 || position.y + ball.radius > canvas.height) {
             velocity = velocity.reflect(new Vector(0, -1));
         }
+        if (position.x - ball.radius < -20 || position.x + ball.radius > canvas.width+10) {
+            ball.position.x = canvas.width/2;
+            ball.position.y = canvas.height/2;
+            position.x = canvas.width/2;
+            position.y = canvas.height/2;
+        }
+        if (position.y - ball.radius< -20 || position.y + ball.radius > canvas.height+10) {
+            ball.position.y = canvas.height/2;
+            ball.position.x = canvas.width/2;
+            position.x = canvas.width/2;
+            position.y = canvas.height/2;
+        }
 
         const ballBox = {
             x: position.x - ball.radius,
@@ -456,6 +474,9 @@ function movement() {
                             if (Enemy.health < 0) {
                                 score += 100;
                                 buffer.splice(index,1)
+                                if (effekt == true) {
+                                    hitSound.play();
+                                }
                                 const explosion = {
                                     frameIndex: 0,
                                     frameCount: 0,
@@ -476,6 +497,9 @@ function movement() {
                             if (Enemy.health < 0) {
                                 score += 100;
                                 buffer.splice(index,1)
+                                if (effekt == true) {
+                                    hitSound.play();
+                                }
                                 const explosion = {
                                     frameIndex: 0,
                                     frameCount: 0,
@@ -546,7 +570,6 @@ if (states.run == true && states.running == false) {
     // empty all buffers
     optionBuffer.splice(0,3);
     ctrBuffer.splice(0,1);
-    cancelAnimationFrame(rottext);
     // render game
     GameLoop();
     // start the game
@@ -569,12 +592,12 @@ if (states.run == true && states.running == false) {
             const deltaTime = (timestamp - lastTimestamp) / 1000; 
             lastTimestamp = timestamp;
             bulletTime();
-            //console.log(kokot)
+            //console.log(ball.position)
             if (!states.paused && !states.over && !states.time) {
                 moveScoreParticles();
                 movement(deltaTime);
                 soundManager(musik);
-            } else {
+            } else {;;
                 soundManager(musik);
             }
 
