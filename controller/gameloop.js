@@ -1,4 +1,4 @@
-import {renderGame,canvas,updateOverlay,renderMainMenu,renderOptions, renderControls,renderLeader} from "../view/renderer.js";
+import {renderGame,canvas,updateOverlay,renderMainMenu,renderOptions, renderControls,renderLeader,rottext,ctx} from "../view/renderer.js";
 import {Paddle} from "../model/paddle.js";
 import {Ball} from "../model/ball.js";
 import {Vector} from "../model/vector.js";
@@ -6,6 +6,12 @@ import {Enemy} from "../model/enemy.js";
 import {Button} from "../model/button.js";
 import {Sound} from "../model/sound.js";
 import { Particle } from "../model/particle.js";
+
+export const explosions = []
+
+
+const explosionFrameWidth = 32;
+const explosionFrameHeight = 32;
 
 let rightPressed = false;
 let leftPressed = false;
@@ -17,7 +23,6 @@ let mousePos;
 let advancment = 0;
 let spawnInterval = 500;
 let chance = 1.00;
-let kokot;
 export let score = 0;
 export let musik = true;
 export let effekt = true;
@@ -64,7 +69,7 @@ export function updateLeaderboard(name) {
     
     localStorage.setItem("leaderboard", JSON.stringify(leaderboard));
 
-    kokot = leaderboard.map(entry => `${entry.name}: ${entry.score}`);
+    leaderboard.map(entry => `${entry.name}: ${entry.score}`);
 }
 
 function bulletTime() {
@@ -451,6 +456,15 @@ function movement() {
                             if (Enemy.health < 0) {
                                 score += 100;
                                 buffer.splice(index,1)
+                                const explosion = {
+                                    frameIndex: 0,
+                                    frameCount: 0,
+                                    position: {
+                                      x: Enemy.position.x + Enemy.size.width / 2 - explosionFrameWidth / 2,
+                                      y: Enemy.position.y + Enemy.size.height / 2 - explosionFrameHeight / 2,
+                                    },
+                                  };
+                                  explosions.push(explosion);
                                 scoreText.push(new Particle({position: {x:Enemy.position.x,y:Enemy.position.y},velocity:{x:-0.5,y:-0.5}},Math.random()*1,'white'))
                             }
                             console.log("JAKK")
@@ -462,6 +476,15 @@ function movement() {
                             if (Enemy.health < 0) {
                                 score += 100;
                                 buffer.splice(index,1)
+                                const explosion = {
+                                    frameIndex: 0,
+                                    frameCount: 0,
+                                    position: {
+                                      x: Enemy.position.x + Enemy.size.width / 2 - explosionFrameWidth / 2,
+                                      y: Enemy.position.y + Enemy.size.height / 2 - explosionFrameHeight / 2,
+                                    },
+                                  };
+                                  explosions.push(explosion);
                                 scoreText.push(new Particle({position: {x:Enemy.position.x,y:Enemy.position.y},velocity:{x:-0.5,y:-0.5}},Math.random()*1,'white'))
                             }
                     }
@@ -476,7 +499,6 @@ function movement() {
                     Enemy.move('fat');
                 }
             }
-            
         })
         if (!invTimeout) {
             invTimeout = setTimeout (()=> {
@@ -484,8 +506,7 @@ function movement() {
                 invTimeout = null
             }, 50);
         }
-        
-    }
+    }   
     function moveStars() {
         const centerX = canvas.width / 2;
         const centerY = canvas.height / 2;
@@ -525,7 +546,7 @@ if (states.run == true && states.running == false) {
     // empty all buffers
     optionBuffer.splice(0,3);
     ctrBuffer.splice(0,1);
-    
+    cancelAnimationFrame(rottext);
     // render game
     GameLoop();
     // start the game
@@ -548,7 +569,7 @@ if (states.run == true && states.running == false) {
             const deltaTime = (timestamp - lastTimestamp) / 1000; 
             lastTimestamp = timestamp;
             bulletTime();
-            console.log(kokot)
+            //console.log(kokot)
             if (!states.paused && !states.over && !states.time) {
                 moveScoreParticles();
                 movement(deltaTime);
@@ -578,7 +599,7 @@ if (states.options == true) {
 if (states.main == true) {
     function Menu() {
         requestAnimationFrame(Menu);
-        console.log(kokot)
+        //console.log(kokot)
         renderMainMenu();
     }
     Menu();

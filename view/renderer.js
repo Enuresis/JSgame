@@ -1,4 +1,4 @@
-import { musik, paddle,stars,ball,states,buffer,mainBuffer,optionBuffer, effekt, ctrBuffer, scoreBuffer,life,score,scoreText,leaderboard} from "../controller/gameloop.js";
+import { musik, paddle,stars,ball,states,buffer,mainBuffer,optionBuffer, effekt, ctrBuffer, scoreBuffer,life,score,scoreText,leaderboard,explosions} from "../controller/gameloop.js";
 
 
 export const canvas = document.querySelector('canvas')
@@ -11,11 +11,22 @@ const spriteW = 16800 / 56
 const spriteH = 250;
 let framex = 16;
 let gameframe = 0;
-let rotationAngle = 0;
-let textX = canvas.width / 2;
-let textY = canvas.height / 2;
-
-
+let angle = 0;
+let rotationDirection = 1;
+let lastAngle = 0;
+let scaleDirection = 1;
+let scale = 1;
+const explosionImage = new Image();
+explosionImage.src = "./assets/enemy/yellow_effects.png";
+const title = new Image();
+title.src = './assets/title/Alien_Break.png'
+export let rottext;
+const explosionFrames = [
+    {x: 544, y: 384},
+    {x: 576, y: 384},
+    {x: 608, y: 384},
+    {x: 640, y: 384}
+];
 
 //clear the canvas
 function clearCanvas() {
@@ -127,7 +138,6 @@ function renderButton(buffer) {
     //console.log(mainBuffer);
 }
 
-
 function renderParticles() {
     stars.forEach(particle => {
         ctx.save()
@@ -147,7 +157,33 @@ function renderHearts() {
         ctx.fillRect(0+i*25, 0, 20, 20);
     }
 }
+function renderExplosion() {
+    explosions.forEach((explosion, index) => {
+        explosion.frameCount++;
 
+        if (explosion.frameCount % 10 == 0) {
+          explosion.frameIndex++;
+        }
+      
+        if (explosion.frameIndex >= explosionFrames.length) {
+          explosions.splice(index, 1);
+        } else {
+
+          const frame = explosionFrames[explosion.frameIndex];
+          ctx.drawImage(
+            explosionImage,
+            frame.x,
+            frame.y,
+            32,
+            32,
+            explosion.position.x,
+            explosion.position.y,
+            32*2,
+            32*2
+          );
+        }
+    }) 
+}
 function renderScore() {
     ctx.fillText(score, canvas.width/2, 30);
 }
@@ -182,21 +218,32 @@ function renderTop() {
       }
 }
 function mainText() {
-    ctx.save();
-    ctx.translate(textX, textY);
-    ctx.rotate(rotationAngle * Math.PI / 180);
-    ctx.textAlign = "center";
-    ctx.fillText("Alien Break", 0, 0);
-    ctx.restore();
+    angle += 0.00001 * rotationDirection;
+    if (angle >= 10 || angle <= -10) {
+      rotationDirection *= -1;
+    }
     
-    // Update the rotation angle and position
-    rotationAngle += 2;
-    textX += Math.sin(rotationAngle * Math.PI / 180);
-    textY += Math.cos(rotationAngle * Math.PI / 180);
-}
+    scale += 0.01 * scaleDirection;
+    if (scale >= 1.5 || scale <= 0.5) {
+      scaleDirection *= -1;
+    }
+
+    if (angle !== lastAngle || scale !== lastScale) {
+      ctx.save();
+      ctx.translate(canvas.width/2, canvas.height / 5);
+      ctx.rotate(angle * Math.PI / 180);
+      ctx.drawImage(title, -title.width / 2, -title.height / 2);
+      ctx.scale(scale, scale);
+      ctx.restore();
+      lastAngle = angle;
+    }
+  
+    rottext = requestAnimationFrame(mainText);
+  }
 // render on screen
 export function renderGame() {
     clearCanvas();
+    renderExplosion();
     renderScoreText();
     renderScore();
     renderHearts();
